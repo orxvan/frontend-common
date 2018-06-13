@@ -7,18 +7,20 @@ var spected = require('spected');
 var ramdaExtra_js = require('./ramda-extra.js');
 
 var renderMsg = function renderMsg(tmpl, arg) {
-  return R.is(Function, tmpl) ? tmpl(arg) : tmpl;
+  return typeof tmpl === 'function' ? tmpl(arg) : tmpl;
 };
 
 var rules = {
   match: function match(pattern) {
-    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should match: ' + pattern;
+    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should match: ' + String(pattern);
     return [R.test(pattern), renderMsg(msg, pattern)];
   },
 
-  minLength: function minLength(length$$1) {
-    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should have min length: ' + length$$1;
-    return [R.pipe(R.length, R.gte(R.__, length$$1)), renderMsg(msg, length$$1)];
+  minLength: function minLength(length) {
+    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should have min length: ' + length;
+    return [function (val) {
+      return !!val && val.length >= length;
+    }, renderMsg(msg, length)];
   },
 
   notBlank: function notBlank() {
@@ -39,6 +41,7 @@ var defineValidator = function defineValidator(_ref) {
 
   return {
     allValid: R.pipe(validate$$1, hasNoErrors),
+
     checkField: function checkField(path$$1, input) {
       return R.pipe(validate$$1, R.path(path$$1))(input);
     },

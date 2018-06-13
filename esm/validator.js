@@ -1,20 +1,22 @@
-import { T, __, always, cond, gte, identity, is, isEmpty, length, path, pipe, reject, test } from 'ramda';
+import { T, always, cond, identity, is, isEmpty, path, pipe, reject, test } from 'ramda';
 import { validate } from 'spected';
 import { isNilOrEmpty, isNotNilOrEmpty } from './ramda-extra.js';
 
 var renderMsg = function renderMsg(tmpl, arg) {
-  return is(Function, tmpl) ? tmpl(arg) : tmpl;
+  return typeof tmpl === 'function' ? tmpl(arg) : tmpl;
 };
 
 var rules = {
   match: function match(pattern) {
-    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should match: ' + pattern;
+    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should match: ' + String(pattern);
     return [test(pattern), renderMsg(msg, pattern)];
   },
 
-  minLength: function minLength(length$$1) {
-    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should have min length: ' + length$$1;
-    return [pipe(length, gte(__, length$$1)), renderMsg(msg, length$$1)];
+  minLength: function minLength(length) {
+    var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'should have min length: ' + length;
+    return [function (val) {
+      return !!val && val.length >= length;
+    }, renderMsg(msg, length)];
   },
 
   notBlank: function notBlank() {
@@ -35,6 +37,7 @@ var defineValidator = function defineValidator(_ref) {
 
   return {
     allValid: pipe(validate$$1, hasNoErrors),
+
     checkField: function checkField(path$$1, input) {
       return pipe(validate$$1, path(path$$1))(input);
     },

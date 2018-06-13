@@ -1,23 +1,83 @@
+import _getIterator from 'babel-runtime/core-js/get-iterator';
 import _classCallCheck from 'babel-runtime/helpers/classCallCheck';
 import _createClass from 'babel-runtime/helpers/createClass';
 import _Symbol from 'babel-runtime/core-js/symbol';
 import debug from 'debug';
-import { T, chain, cond, either, equals, filter, identity, is, isEmpty, isNil, join, keys, pipe, reduce, reject, slice, toString, type, unapply } from 'ramda';
-
-var is$1 = is;
-var isEmpty$1 = isEmpty;
+import { T, concat, cond, filter, is, isEmpty, join, keys, pipe, reduce, reject, slice, toString, type } from 'ramda';
+import { isNilOrEmpty } from './ramda-extra.js';
 
 var log = debug('ein:common:style-set');
 
-var isSymbol = either(is(_Symbol), pipe(type, equals('Symbol')));
+var isSymbol = function isSymbol(value) {
+  return is(_Symbol, value) || type(value) === 'Symbol';
+};
 
-var isBlank = cond([[is$1(String), function (s) {
-  return isEmpty$1(s.trim());
-}], [T, either(isEmpty$1, isNil)]]);
+var symbolToString = pipe(toString, slice('Symbol('.length, -1));
+var extractTruthyKeys = pipe(filter(function (v) {
+  return !!v;
+}), keys);
+
+var isBlank = cond([[is(String), function (s) {
+  return isEmpty(s.trim());
+}], [T, isNilOrEmpty]]);
 
 var rejectBlank = reject(isBlank);
 
 var StyleSet = function () {
+  _createClass(StyleSet, null, [{
+    key: 'flattenClasses',
+    value: function flattenClasses(classes) {
+      var rv = [];
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = _getIterator(classes), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var name = _step.value;
+
+          if (typeof name === 'string') {
+            rv.push(name);
+          } else if (isSymbol(name)) {
+            rv.push(symbolToString(name));
+          } else if (Array.isArray(name)) {
+            var xs = name.map(function (s) {
+              return isSymbol(s) ? symbolToString(s) : String(s);
+            });
+            rv = concat(rv, xs);
+          } else if (is(Object, name) && !!name) {
+            rv = concat(rv, extractTruthyKeys(name));
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return rv;
+    }
+  }, {
+    key: 'join',
+    value: function join$$1() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return pipe(StyleSet.flattenClasses, rejectBlank, join(' '))(args);
+    }
+  }]);
+
   function StyleSet(blockName, styles) {
     _classCallCheck(this, StyleSet);
 
@@ -28,8 +88,8 @@ var StyleSet = function () {
   _createClass(StyleSet, [{
     key: 'block',
     value: function block() {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
       }
 
       return this._join({ args: args, baseName: this.blockName });
@@ -37,8 +97,8 @@ var StyleSet = function () {
   }, {
     key: 'elem',
     value: function elem(name) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        args[_key2 - 1] = arguments[_key2];
+      for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
       }
 
       return this._join({ args: args, baseName: this.blockName + '__' + name });
@@ -91,10 +151,6 @@ var StyleSet = function () {
 
   return StyleSet;
 }();
-
-StyleSet.flattenClasses = chain(cond([[is$1(String), identity], [isSymbol, pipe(toString, slice('Symbol('.length, -1))], [is$1(Array), identity], [is$1(Object), pipe(filter(identity), keys)]]));
-
-StyleSet.join = unapply(pipe(StyleSet.flattenClasses, rejectBlank, join(' ')));
 
 export default StyleSet;
 //# sourceMappingURL=style-set.js.map

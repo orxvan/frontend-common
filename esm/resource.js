@@ -2,11 +2,10 @@ import _regeneratorRuntime from 'babel-runtime/regenerator';
 import _asyncToGenerator from 'babel-runtime/helpers/asyncToGenerator';
 import axios from 'axios';
 import debug from 'debug';
-import { assoc, assocPath, is, pipe, prop, reduce, replace, tap, values } from 'ramda';
+import { assoc, assocPath, pipe, prop, reduce, replace, tap, values } from 'ramda';
 
 var _this = undefined;
 
-var isFunction = is(Function);
 var log = debug('ein:common:resource');
 
 var normalizeURL = pipe(replace(/\/+$/, ''), replace(/^/, '/'), replace(/\/+/g, '/'));
@@ -22,17 +21,11 @@ var defineEndpoint = function defineEndpoint(name, makeImpl) {
   };
 };
 
-var selectResponse = function selectResponse(selector, _ref) {
-  var data = _ref.data;
-  return isFunction(selector) ? selector(data) : data;
-};
-
 var methods = {
   list: function list() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return defineEndpoint('list', function (_ref2) {
-      var baseURL = _ref2.baseURL,
-          http = _ref2.http;
+    return defineEndpoint('list', function (_ref) {
+      var baseURL = _ref.baseURL,
+          http = _ref.http;
       return _asyncToGenerator(_regeneratorRuntime.mark(function _callee() {
         var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var resp;
@@ -45,7 +38,7 @@ var methods = {
 
               case 2:
                 resp = _context.sent;
-                return _context.abrupt('return', selectResponse(options.selector, resp));
+                return _context.abrupt('return', resp.data);
 
               case 4:
               case 'end':
@@ -58,10 +51,9 @@ var methods = {
   },
 
   create: function create() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return defineEndpoint('create', function (_ref4) {
-      var baseURL = _ref4.baseURL,
-          http = _ref4.http;
+    return defineEndpoint('create', function (_ref3) {
+      var baseURL = _ref3.baseURL,
+          http = _ref3.http;
       return _asyncToGenerator(_regeneratorRuntime.mark(function _callee2() {
         var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var resp;
@@ -74,7 +66,7 @@ var methods = {
 
               case 2:
                 resp = _context2.sent;
-                return _context2.abrupt('return', selectResponse(options.selector, resp));
+                return _context2.abrupt('return', resp.data);
 
               case 4:
               case 'end':
@@ -87,23 +79,22 @@ var methods = {
   },
 
   get: function get() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return defineEndpoint('get', function (_ref6) {
-      var baseURL = _ref6.baseURL,
-          http = _ref6.http;
+    return defineEndpoint('get', function (_ref5) {
+      var baseURL = _ref5.baseURL,
+          http = _ref5.http;
       return function () {
-        var _ref7 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee3(id) {
+        var _ref6 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee3(id) {
           var resp;
           return _regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
               switch (_context3.prev = _context3.next) {
                 case 0:
                   _context3.next = 2;
-                  return http.get(baseURL + '/' + id);
+                  return http.get(baseURL + '/' + String(id));
 
                 case 2:
                   resp = _context3.sent;
-                  return _context3.abrupt('return', selectResponse(options.selector, resp));
+                  return _context3.abrupt('return', resp.data);
 
                 case 4:
                 case 'end':
@@ -113,31 +104,30 @@ var methods = {
           }, _callee3, _this);
         }));
 
-        return function (_x7) {
-          return _ref7.apply(this, arguments);
+        return function (_x4) {
+          return _ref6.apply(this, arguments);
         };
       }();
     });
   },
 
   update: function update() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return defineEndpoint('update', function (_ref8) {
-      var baseURL = _ref8.baseURL,
-          http = _ref8.http;
+    return defineEndpoint('update', function (_ref7) {
+      var baseURL = _ref7.baseURL,
+          http = _ref7.http;
       return function () {
-        var _ref9 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee4(id, data) {
+        var _ref8 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee4(id, data) {
           var resp;
           return _regeneratorRuntime.wrap(function _callee4$(_context4) {
             while (1) {
               switch (_context4.prev = _context4.next) {
                 case 0:
                   _context4.next = 2;
-                  return http.put(baseURL + '/' + id, data);
+                  return http.put(baseURL + '/' + String(id), data);
 
                 case 2:
                   resp = _context4.sent;
-                  return _context4.abrupt('return', selectResponse(options.selector, resp));
+                  return _context4.abrupt('return', resp.data);
 
                 case 4:
                 case 'end':
@@ -147,25 +137,25 @@ var methods = {
           }, _callee4, _this);
         }));
 
-        return function (_x9, _x10) {
-          return _ref9.apply(this, arguments);
+        return function (_x5, _x6) {
+          return _ref8.apply(this, arguments);
         };
       }();
     });
   },
 
   delete: function _delete() {
-    return defineEndpoint('delete', function (_ref10) {
-      var baseURL = _ref10.baseURL,
-          http = _ref10.http;
+    return defineEndpoint('delete', function (_ref9) {
+      var baseURL = _ref9.baseURL,
+          http = _ref9.http;
       return function () {
-        var _ref11 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee5(id) {
+        var _ref10 = _asyncToGenerator(_regeneratorRuntime.mark(function _callee5(id) {
           return _regeneratorRuntime.wrap(function _callee5$(_context5) {
             while (1) {
               switch (_context5.prev = _context5.next) {
                 case 0:
                   _context5.next = 2;
-                  return http.delete(baseURL + '/' + id);
+                  return http.delete(baseURL + '/' + String(id));
 
                 case 2:
                   return _context5.abrupt('return', true);
@@ -178,8 +168,8 @@ var methods = {
           }, _callee5, _this);
         }));
 
-        return function (_x11) {
-          return _ref11.apply(this, arguments);
+        return function (_x7) {
+          return _ref10.apply(this, arguments);
         };
       }();
     });
@@ -192,7 +182,7 @@ var withHttp = function withHttp(client) {
   return assoc('http', client);
 };
 
-var DEFAULT_OPTIONS = {
+var DEFAULT_CONFIG = {
   baseURL: '/',
   endpoints: {},
   http: axios.create({
@@ -206,7 +196,7 @@ var defineResourceMethod = function defineResourceMethod(resource, endpoint) {
 
 var defineResource = pipe(reduce(function (config, builder) {
   return builder(config);
-}, DEFAULT_OPTIONS), tap(function (config) {
+}, DEFAULT_CONFIG), tap(function (config) {
   return log('defineResource:', config);
 }), prop('endpoints'), values, reduce(defineResourceMethod, {}));
 

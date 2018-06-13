@@ -61,7 +61,7 @@ var LOCALE = 'zh-cn';
 
 var setupLocale = function setupLocale() {
   if (moment.locales().indexOf(LOCALE) !== -1) {
-    moment.locale(LOCALE, null);
+    moment.updateLocale(LOCALE);
   }
 
   moment.locale('zh-cn', momentLocale);
